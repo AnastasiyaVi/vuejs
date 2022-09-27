@@ -7,7 +7,6 @@ export default {
 	name: 'addCoast',
 	data() {
 		return {
-
 		};
 	},
 	methods: {

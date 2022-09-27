@@ -2,61 +2,77 @@
     <div class="add-wrapper">
         <div class="add-info">
             <label class="add-info__label" for="">Date</label>
-            <input class="add-info__input" placeholder="Payment date" v-model.trim="date">
+            <input class="add-info__input" placeholder="add date" v-model.trim="date" />
         </div>
         <div class="add-info">
             <label class="add-info__label" for="">Category</label>
-            <input class="add-info__input" placeholder="Payment description" v-model.trim="category">
+
+            <select-list :dictionaryList="getCategorylist" />
+
+
         </div>
         <div class="add-info">
             <label class="add-info__label" for="">Value</label>
-            <input class="add-info__input" placeholder="Payment amount" v-model="value">
+            <input class="add-info__input" placeholder="insert price" v-model="value" />
         </div>
         <div class="add-btns">
-            <button class="add-btn__cancel" @click="onCancel">Cancel </button>
-            <button class="add-btn__save" @click="onSave">ADD +</button>
+            <button class="add-btn__cancel" @click="onCancel">Cancel</button>
+            <button class="add-btn__save" @click="onSave">Save</button>
         </div>
-
     </div>
 </template>
 
 <script>
+import SelectList from './SelectList.vue';
+import { mapGetters, mapActions } from 'vuex';
 export default {
     name: 'addPayment',
+    components: { SelectList },
+    emits: ['saveEmit', 'cancelEmit'],
     data() {
         return {
             date: '',
-            category: ''
-            // value: 'Payment amount'
-        }
+            category: '',
+            value: 0,
+        };
     },
     methods: {
         onSave() {
-            const { value } = this
+
+            const { category, value } = this;
+
             const data = {
                 date: this.date || this.getCurrentDate,
-                category: this.category || 'Unsorted',
-                value
-            }
-            this.$emit('saveEmit', data)
+                category,
+                value,
+            };
+            this.$emit('saveEmit', data);
         },
         onCancel() {
-            this.$emit('cancelEmit')
-        }
-    },
-    computed: {
-        getCurrentDate() {
-            const date = new Date()
-            const d = date.getDate()
-            const m = date.getMonth()
-            const y = date.getFullYear()
-            return `${d}.${m}.${y}`
+            this.$emit('cancelEmit');
         },
     },
-}
+    computed: {
+        ...mapGetters(['getCategorylist']),
+        getCurrentDate() {
+            const date = new Date();
+            const d = date.getDate();
+            const m = date.getMonth();
+            const y = date.getFullYear();
+            return `${d}.${m}.${y}`;
+        },
+    },
+    actions: {
+        ...mapActions(['loadCategories']),
+    },
+    mounted() {
+        this.$store.dispatch('loadCategories');
+    },
+};
 </script>
 
-<style scoped>
+
+<style lang="scss" scoped>
 .add-wrapper {
     width: 80%;
     margin: 0 auto;

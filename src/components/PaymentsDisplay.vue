@@ -1,35 +1,57 @@
 <template>
-    <div class="payment__table">
-        <div class="payment__header">
-            <div class="payment__header-item">Nr.</div>
-            <div class="payment__header-item">Date</div>
-            <div class="payment__header-item">Category</div>
-            <div class="payment__header-item">Value</div>
+    <div>
+        <div class="payment__table">
+            <div class="payment__header">
+                <div class="payment__header-item">Nr.</div>
+                <div class="payment__header-item">Date</div>
+                <div class="payment__header-item">Category</div>
+                <div class="payment__header-item">Value</div>
+            </div>
+            <div class="payment__line" v-for="(item, index) in currentElements" :key="index">
+                <div class="payment__line-item">{{ index + 1 }}</div>
+                <div class="payment__line-item">{{ item.date }}</div>
+                <div class="payment__line-item">{{ item.category }}</div>
+                <div class="payment__line-item">{{ item.value }}</div>
+            </div>
         </div>
-        <div class="payment__line" v-for="(item, index) in items" :key="index">
 
-            <div class="payment__line-item">{{index +1}}</div>
-            <div class="payment__line-item">{{item.date}}</div>
-            <div class="payment__line-item">{{item.category}}</div>
-            <div class="payment__line-item">{{item.value}}</div>
-        </div>
+        <Pagination :length="getPaymentList.length" :n="n" :cur="page" @paginate="onPgaginate" />
     </div>
 </template>
 
 <script>
+import Pagination from './Pagination';
+import { mapGetters } from 'vuex';
 export default {
     name: 'PaymentsDisplay',
+    components: {
+        Pagination,
+    },
     props: {
         items: {
             type: Array,
-            default: () => []
+            default: () => [],
         },
     },
     data() {
         return {
-        }
+            page: 1,
+            n: 15,
+        };
     },
-}
+    methods: {
+        onPgaginate(p) {
+            this.page = p;
+        },
+    },
+    computed: {
+        ...mapGetters(['getPaymentList']),
+        currentElements() {
+            const { n, page } = this;
+            return this.items.slice(n * (page - 1), n * (page - 1) + n);
+        },
+    },
+};
 </script>
 
 <style scoped>

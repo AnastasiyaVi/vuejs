@@ -2,70 +2,63 @@
 	<div id="app">
 		<div class="wrapper">
 			<header>
-				<h1 class="title">My personal costs</h1>
-
+				<h1 class="title">My personal Cost</h1>
+				<h2 class="subtitle">Total: {{ getFullPaymentValue }}</h2>
 			</header>
 			<main>
 				<add-payment v-if="addBtnIsShown" @cancelEmit="emitAction" @saveEmit="addPayment" />
 				<button class="add-btn" @click="addBtnIsShown = !addBtnIsShown" v-if="!addBtnIsShown">
 					ADD NEW COST +
 				</button>
-				<payments-display :items="paymentsList" />
-				<pagination :selectList="paymentsList" />
+				<payments-display :items="getPaymentList" />
 			</main>
 		</div>
 	</div>
 </template>
 
 <script>
-import AddPayment from './components/addPayment.vue';
-import Pagination from './components/Pagination.vue';
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 import PaymentsDisplay from './components/PaymentsDisplay.vue';
-
+import AddPayment from './components/addPayment.vue';
 export default {
 	name: 'App',
 	components: {
 		PaymentsDisplay,
 		AddPayment,
-		Pagination,
 	},
-
 	data() {
 		return {
-			paymentsList: [],
-			addBtnIsShown: false,
-		};
+			addBtnIsShown: false
+		}
+	},
+	actions: {
+		...mapActions([
+			'fetchData'
+		])
+	},
+	computed: {
+		...mapGetters([
+			'getPaymentList',
+			'getFullPaymentValue'
+		]),
+	},
+	created() {
+		// this.setPaymentListData(this.fetchData())
+	},
+	mounted() {
+		this.$store.dispatch('fetchData')
 	},
 	methods: {
-		addPayment(data) {
-			this.paymentsList.push(data);
-		},
+		...mapMutations([
+			'setPaymentListData'
+		]),
 		emitAction() {
 			this.addBtnIsShown = false;
 		},
-		fetchData() {
-			return [
-				{
-					date: '21.09.2022',
-					category: 'Food',
-					value: '123',
-				},
-				{
-					date: '21.09.2022',
-					category: 'Transport',
-					value: '13',
-				},
-				{
-					date: '21.09.2022',
-					category: 'Housing',
-					value: '12',
-				},
-			];
-		},
-	},
-	created() {
-		this.paymentsList = this.fetchData();
-	},
+		addPayment(data) {
+			this.$store.commit('addDataToPaymentList', data)
+		}
+	}
 };
 </script>
 
