@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
 	<button class="add-coast__btn" @click="addCoast"></button>
 </template>
 
@@ -25,4 +25,4 @@ export default {
 	border: 1px solid #3f95cd;
 	border-radius: 20px;
 }
-</style>
+</style> -->
