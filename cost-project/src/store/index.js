@@ -1,4 +1,3 @@
-
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -73,6 +72,9 @@ export default new Vuex.Store({
   },
 
   actions: {
+    addData({ commit }, payload) {
+      console.log(commit, payload)
+    },
     fetchData({ commit, state }, page) {
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -83,7 +85,7 @@ export default new Vuex.Store({
             let randomCategory = Math.floor(Math.random() * this.state.categoryList.length);
             items.push({
               id: ++id,
-              data: "22.09.2022",
+              data: "01.12.2021",
               category: state.categoryList[randomCategory],
               value: getRandomArbitrary(1000, 5000),
             })
