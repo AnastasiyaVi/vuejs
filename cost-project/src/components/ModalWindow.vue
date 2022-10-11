@@ -1,4 +1,5 @@
 <template>
+
     <div class="wrapper">
         <div class="header">
             <p>{{ settings.header }}</p>
@@ -14,9 +15,10 @@
 </template>
   
 <script>
+
 import AddPayment from "./AddPayment.vue";
 import UpdatePayment from "./UpdatePayment.vue";
-import CategorySelect from "./CategorySelect.vue";
+import CategorySelect from "./AddCategory.vue";
 export default {
     components: { AddPayment, UpdatePayment, CategorySelect },
     props: {

@@ -60,14 +60,14 @@ export default new Vuex.Store({
           : item
       });
       state.paymantsList[state.page] = [...state.paymantsList[state.page]]
-      // Vue.set(state, "paymantsList", state.paymantsList);
+
     },
 
     deleteDataFromList(state, payload) {
-      const data = state.paymantsList[state.page].filter(item => item.id != payload);
+      const data = state.paymantsList[state.page].filter(item => item.id != payload.id);
       state.paymantsList[state.page] = data;
       Vue.set(state.paymantsList, state.page, data);
-      // Vue.set(state, "paymantsList", state.paymantsList);
+
     }
   },
 
@@ -125,6 +125,38 @@ export default new Vuex.Store({
     },
     getDataById: state => id => {
       return state.paymantsList[state.page].filter(item => item.id === id)
+    },
+    getChartData: state => {
+      let map = {};
+      if (state.paymantsList[state.page]) {
+        map = state.paymantsList[state.page].reduce((map, obj) => {
+          if (map[obj.category] == undefined) {
+            map[obj.category] = obj.value;
+          } else {
+            map[obj.category] += obj.value;
+          }
+          return map;
+        }, {});
+      }
+      const label = [];
+      const data = [];
+      const color = []
+      for (let key in map) {
+        label.push(key);
+        data.push(map[key]);
+        color.push(getRandomColor());
+      }
+
+      const ob = {
+        labels: label,
+        datasets: [
+          {
+            backgroundColor: color,
+            data: data
+          }
+        ]
+      };
+      return ob;
     }
   }
 })
@@ -133,4 +165,13 @@ function getRandomArbitrary(min, max) {
   return Math.floor(
     Math.random() * (max - min) + min
   )
+}
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }

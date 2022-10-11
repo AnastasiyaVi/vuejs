@@ -1,23 +1,22 @@
 <template>
-    <div>
-        <div class="addData">
-            <input class="inputData" v-model="date" placeholder="date" />
-            <select class="inputData" v-model="selected">
-                <option value="" disabled selected>Choose category...</option>
-                <option v-for="(option, idx) in getCategories" :key="idx">
-                    {{ option }}
-                </option>
-            </select>
 
-            <input class="inputData" v-model.number="value" type="number" placeholder="value" />
-            <button class="addDataButton" @click="onClick">Add NEW COST +</button>
-        </div>
-    </div>
+    <v-form>
+        <v-text-field v-model="date" label="Date" required></v-text-field>
+        <v-select v-model="selected" :items="getCategories" label="Choose category..." required></v-select>
+        <v-text-field v-model="value" label="Value" required></v-text-field>
+        <v-btn color="teal" dark @click="onClick">Add<v-icon>mdi-plus</v-icon>
+        </v-btn>
+        <v-btn class="mr-4" color="teal" dark @click="onClose" v-if="dialog">Cancel</v-btn>
+    </v-form>
 </template>
   
 <script>
+
 export default {
     name: "AddPayment",
+    props: {
+        dialog: Boolean,
+    },
     data: () => ({
         date: "",
         category: "",
@@ -46,6 +45,10 @@ export default {
             console.log("add", data);
             this.$emit("addNewPayment", data, "true");
         },
+        onClose() {
+            const data = false;
+            this.$emit("closeAddPayment", data, "true");
+        }
     },
     computed: {
         getCurrentDate() {
@@ -66,61 +69,12 @@ export default {
         },
     },
     created() {
-        // загружаем данные, когда представление создано
-        // и данные реактивно отслеживаются
+
         this.fetchData();
     },
     watch: {
-        // при изменениях маршрута запрашиваем данные снова
+
         $route: "fetchData",
     },
 };
 </script>
-  
-<style  lang="scss" scoped>
-* {
-    max-width: 1140px;
-    margin: 0 auto;
-}
-
-.addCost {
-    width: 150px;
-    background: #3bba9f;
-    color: #fff;
-    text-transform: uppercase;
-    padding: 10px;
-    margin: 10px 0;
-}
-
-.addData {
-    display: flex;
-    flex-direction: column;
-    width: 25%;
-
-}
-
-.inputData {
-    text-transform: capitalize;
-    padding: 15px 5px;
-    margin: 5px 0;
-    border: 1px solid #dddddd;
-    font-size: 20px;
-    color: rgb(56, 54, 54);
-}
-
-.addDataButton {
-    width: 150px;
-    background: #3bba9f;
-    color: #fff;
-    text-transform: uppercase;
-    padding: 10px;
-    align-self: flex-end;
-    margin: 10px 0;
-    border: 1px solid grey;
-}
-
-.addDataButton:hover {
-    color: #3bba9f;
-    background: #fff;
-}
-</style>

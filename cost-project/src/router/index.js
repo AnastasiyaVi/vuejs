@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-//import AddPayment from '../components/AddPayment'
 
 
 Vue.use(Router);

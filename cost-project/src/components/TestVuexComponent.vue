@@ -1,4 +1,5 @@
 <template>
+
     <div>
         <input v-model="propComp" />
         <button @click="onSave">Save</button>
@@ -6,6 +7,7 @@
 </template>
   
 <script>
+
 import { mapActions } from "vuex";
 export default {
     name: "TestVuexComponent",

@@ -1,132 +1,149 @@
 <template>
-    <div class="payments-list">
-        <table class="table">
-            <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Value</th>
-                <th></th>
-            </tr>
 
-            <tr v-for="(item, idx) in getPaymentList" :key="idx">
-                <td>{{ item.id }}</td>
-                <td>{{ item.data }}</td>
-                <td>{{ item.category }}</td>
-                <td>{{ item.value }}</td>
-                <td class="table_menu">
-                    <button class="popup_menu_button" @click.prevent="clickHandle(item.id)">
-                        <i class="fa fa-solid fa-ellipsis-vertical"></i>
-                    </button>
-                </td>
-            </tr>
-        </table>
-        <transition name="fade">
-            <modal-popup-menu v-if="modalSettings.show" :settings="modalSettings" />
-        </transition>
+    <div>
+        <v-data-table :headers="header" :items="getPaymentList" :items-per-page="getItemsPerPage"
+            :hide-default-footer="true" item-key="id" class="elevation-1">
+            <template v-slot:top>
+                <v-dialog v-model="dialog" max-width="500px">
+                    <v-card>
+                        <v-card-title>
+                            <span class="text-h5">Edit item</span>
+                        </v-card-title>
+
+                        <v-card-text>
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="12" sm="6" md="4">
+                                        <v-text-field v-model="editedItem.data" label="Data"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="4">
+                                        <v-text-field v-model="editedItem.category" label="Category"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="4">
+                                        <v-text-field v-model="editedItem.value" label="Value"></v-text-field>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                        </v-card-text>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="blue darken-1" text @click="close">
+                                Cancel
+                            </v-btn>
+                            <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <v-dialog v-model="dialogDelete" max-width="500px">
+                    <v-card>
+                        <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
+                            <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                            <v-spacer></v-spacer>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+            </template>
+
+            <template v-slot:item.actions="{ item }">
+                <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
+                <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+            </template>
+        </v-data-table>
+
+        <v-pagination v-model="page" :length="pageCount" :page="page" @input="changePage"></v-pagination>
     </div>
 </template>
-
+  
 <script>
-import ModalPopupMenu from "./ModalPopupMenu.vue";
+
 export default {
     name: "PlaymentsDisplay",
-    components: {
-        ModalPopupMenu,
-    },
     props: {
-        list: {
-            type: Array,
-            default: () => [],
-        },
+        pageCount: Number,
     },
     data() {
         return {
-            modalSettings: {
-                show: false,
+            header: [
+                { text: "#", value: "id", align: "left", sortable: false },
+                { text: "Date", value: "data", sortable: false },
+                { text: "Category", value: "category", sortable: false },
+                { text: "Value", value: "value", sortable: false },
+                { text: "Actions", value: "actions", sortable: false },
+            ],
+            page: 1,
+            dialog: false,
+            dialogDelete: false,
+            editedItem: {
+                id: "",
+                data: "",
+                category: "",
+                value: 0,
+            },
+            defaultItem: {
+                id: "",
+                data: "",
+                category: "",
+                value: 0,
             },
         };
     },
     methods: {
-        clickHandle(id) {
-            console.log(id);
-            this.$modal.show("", { id: id, show: !this.modalSettings.show });
+        changePage(page) {
+            console.log("Page = " + page);
+            this.page = page;
+            this.$store.dispatch("fetchData", "page" + page);
         },
-        onShow(settings) {
-            this.modalSettings = settings;
-            console.log(settings);
+        editItem(item) {
+            this.editedItem = Object.assign({}, item);
+            this.dialog = true;
         },
-        onHide() {
-            this.modalSettings = {};
+        deleteItem(item) {
+            this.editedItem = Object.assign({}, item);
+            this.dialogDelete = true;
+        },
+        deleteItemConfirm() {
+            this.$store.commit("deleteDataFromList", this.editedItem);
+            this.closeDelete();
+        },
+        close() {
+            this.dialog = false;
+            this.$nextTick(() => {
+                this.editedItem = Object.assign({}, this.defaultItem);
+            });
+        },
+        closeDelete() {
+            this.dialogDelete = false;
+            this.$nextTick(() => {
+                this.editedItem = Object.assign({}, this.defaultItem);
+            });
+        },
+        save() {
+            console.log("save item");
+            console.log(this.editedItem);
+            this.$store.commit("updateData", this.editedItem);
+            this.close();
         },
     },
     computed: {
         getPaymentList() {
             return this.$store.getters.getPaymentList;
         },
+        getItemsPerPage() {
+            const list = this.$store.getters.getPaymentList;
+            return list == undefined ? 10 : list.length;
+        },
     },
-    created() {
-        this.$store.dispatch("fetchData", "page1");
-    },
-    mounted() {
-        this.$modal.EventBus.$on("shown", this.onShow);
-        this.$modal.EventBus.$on("hide", this.onHide);
+    watch: {
+        dialog(val) {
+            val || this.close();
+        },
+        dialogDelete(val) {
+            val || this.closeDelete();
+        },
     },
 };
 </script>
-  
-<style lang="scss" scoped>
-.table {
-    width: 50%;
-    margin-bottom: 20px;
-    border-collapse: collapse;
-}
-
-.table th {
-
-
-    padding: 15px 5px;
-    border-bottom: 1px solid #dddddd;
-}
-
-.table td {
-    border-bottom: 1px solid #dddddd;
-    padding: 15px 5px;
-}
-
-.popup_menu_button {
-    border: none;
-    fill: #000;
-    background-color: transparent;
-    position: relative;
-}
-
-.popup_menu_button:hover {
-    transform: scale(1.5);
-    fill: #000;
-}
-
-.popup_menu_button:active {
-    fill: #fff;
-}
-
-.popup_menu_button:focus {
-    fill: #000;
-    outline: none;
-}
-
-.table_menu {
-    width: 50px;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 1s;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>
-  
